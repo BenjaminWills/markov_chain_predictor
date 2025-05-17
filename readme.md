@@ -55,6 +55,17 @@ Given a fully functional markov chain  we can sample an initial state $s_0$ whic
 3. Randomly sample from the probability distribution defined by the edges to those neighbours and move to state $s_{i+1}$
 4. Repeat froms step 2 until a criteria is met.
 
+## Example outputs
+
+Fitting the model to the entire of Frankenstein and asking it to generate a 200 word story looks like this (with the first 3-gram chosen randomly):
+
+
+>**Random n-gram: ('which', 'a', 'prison')**: which a prison was as welcome a residence as the divinest scene in nature;and these signs of comfort increased daily as the season advanced.The old man appeared enraptured and said some words which Agatha endeavoured to explain to Safie,and by the fire which my odious companion had lighted,he thus began his tale.I was,to a degree I never experienced in studying the authors of any other country.When you read their writings,life appears to consist in a warm sun and a garden of roses,in the open air,climbing the hills or rowing on the lake alone in a little boat,with a pail on her head,passing before my hovel to conceal my retreat.The fresh air revived me,and above all,I desired to see my sweet Elizabeth in some degree beneficial;but a fatal prejudice clouds their eyes,and my dreams lulled me even to rapture.The spirits that guarded me had provided these moments,or rather,to word my phrase more characteristically,of advancement in his profession.
+
+Of course, by feeding the model more information, it gains a better understanding of the english language. When training the modelon 25 books from project gutenberg and asking it ton generate a story using 3-grams it looks like this: 
+
+>**Random n-gram: ('in', 'imagination', 'to')**: in imagination to the other as politely and more earnestly negatived,she seated herself.Mrs.Gardiner,whose manners resembled those of a large house in Edward Street,and breaking the seal,to her,and her predilection for him was his own great-great-grand-mother of all tragedies?Where,that is all.She might never even see him again.He is very good,and they kneeled down and rested their foreheads on the coffin-lid,and then they d find out I loved her once!It seems to be all well is a disease like everything that exceeds moderation.And,what,at parties,is there a fleeting moment of real colour.Then the old man said,And first-rate strokes himself,and he took off his hat on seeing her again.Valancy had stared around her.She would just slip down for I raised her and smiled with her eyes fixed on the floor and read and looked and spoke with the same picture inside,and a yachting cap.
+
 # Tokenisation
 
 The tokeniser in this repo is rudimentary, it splits based on words and punctuation.
