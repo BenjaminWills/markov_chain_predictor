@@ -42,6 +42,19 @@ So an n-gram can represent the combinations of words in a sentance, and the numb
 
 As you can probably imagine, predicting sequences of words may be more useful to understanding the grammar of English than predicting just singular words. So we can define a state as being an n-gram of the data, and the transitions are from one n-gram to another. So when looking in the data, we look for n-grams that directly follow one another, for example in the above example we'd count the number of times "The big red" preceeded "big red cat" and calculate probabilies.
 
+## Production of a probability distribution
+
+We then need to produce a probability distribution of consecutive pairs of n-grams, then we can normalise the probability distribution for each first n-gram in the sequences and create a markov chain. 
+
+## Getting text out of the chain
+
+Given a fully functional markov chain  we can sample an initial state $s_0$ which will be one of our n-grams, and from there begin a random walk to any neighbours, where the next state will be determined by a weighted random distrbution depending on word frequencies in the text. The algorithm works as follows:
+
+1. Choose $s_0$
+2. Look at the one hop neighbours around $s_i$
+3. Randomly sample from the probability distribution defined by the edges to those neighbours and move to state $s_{i+1}$
+4. Repeat froms step 2 until a criteria is met.
+
 # Tokenisation
 
 The tokeniser in this repo is rudimentary, it splits based on words and punctuation.
