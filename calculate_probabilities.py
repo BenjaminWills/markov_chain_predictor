@@ -1,4 +1,4 @@
-from collections import Counter
+from collections import Counter, defaultdict
 from typing import Dict, List, Tuple
 
 from tokeniser import tokenise, detokenise
@@ -90,57 +90,61 @@ def calculate_n_gram_probabilities(
 
 
 def create_n_gram_graph(
-    n_gram_frequency: Dict[str, int],
-) -> List[Tuple[str, str, float]]:
-    """To do this we want to look at all the first words in the n-grams,
-    and make a list of all second words that follow them and their probabilities.
+    text_corpus: str,
+    n: int,
+) -> Dict[str, Dict[Tuple[str], float]]:
+    # Tokenise the text corpus
+    tokens = tokenise(text_corpus)
+
+    # Create the list of n grams, to do this we look at the tokenisation n-wise and create a list of n grams
+    n_grams = calculate_n_grams(tokens, n)
+
+    # Given some n_gram frequency, we want to calculate the probability distribution of a set of n-grams being after a given n-gram
+    # An example of this could be {('hello', 'how'): {('how', 'are'): 0.5, ('how', 'is'): 0.5}}
+    n_gram_graph = defaultdict(lambda: defaultdict(lambda: 0))
+
+    for index in range(len(n_grams) - 1):
+        # Get the n-gram and the next n-gram
+        n_gram = n_grams[index]
+        next_n_gram = n_grams[index + 1]
+
+        # Add to the graph, calculate frequency
+        n_gram_graph[n_gram][next_n_gram] += 1
+
+    # Normalise the probabilities for each source token
+    for source_token, target_tokens in n_gram_graph.items():
+        total_count = sum(target_tokens.values())
+        for target_token, count in target_tokens.items():
+            n_gram_graph[source_token][target_token] = count / total_count
+
+    return n_gram_graph
+
+
+def recombine_n_grams(n_grams: List[Tuple[str]]) -> str:
+    """Recombine n-grams into a string.
 
     Parameters
     ----------
-    n_gram_frequency : Dict[str, int]
-        _description_
+    n_grams : List[Tuple[str]]
+        The list of n-grams to recombine.
 
     Returns
     -------
-    Dict[str, List[Tuple[str, float]]]
-        _description_
+    str
+        The recombined string.
     """
-
-    # Create a graph of n-grams and their probabilities
-    n_grams = n_gram_frequency.keys()
-
-    # Group by the first token
-    n_gram_graph = {}
-    for n_gram in n_grams:
-        first_token = n_gram[0]
-        second_token = n_gram[1]
-
-        if first_token not in n_gram_graph:
-            n_gram_graph[first_token] = []
-
-        # Calculate the probability of the second token given the first token
-        probability = n_gram_frequency[n_gram]
-
-        n_gram_graph[first_token].append((second_token, probability))
-
-    # Normalise the probabilities
-    for first_token, second_tokens in n_gram_graph.items():
-        total_probability = sum(prob for _, prob in second_tokens)
-        n_gram_graph[first_token] = [
-            (second_token, prob / total_probability)
-            for second_token, prob in second_tokens
-        ]
-
-    # Turn into a list of tuples
-    list_graph = []
-    for first_token, second_tokens in n_gram_graph.items():
-        for second_token, prob in second_tokens:
-            list_graph.append((first_token, second_token, prob))
-
-    return list_graph
+    # Initally take the first three tokens
+    recombined_token_list = list(n_grams[0])
+    # Loop through the n-grams and append the last token of each n-gram
+    for n_gram in n_grams[1:]:
+        # Append the last token of the n-gram
+        recombined_token_list.append(n_gram[-1])
+    return detokenise(recombined_token_list)
 
 
-def sample_n_gram_graph(token: str, n_gram_graph: List[Tuple[str, str, float]]) -> str:
+def sample_n_gram_graph(
+    n_gram: Tuple[str], n_gram_graph: Dict[str, Dict[Tuple[str], float]]
+) -> str:
     """Sample a token from the n-gram graph given a token.
 
     Parameters
@@ -155,23 +159,23 @@ def sample_n_gram_graph(token: str, n_gram_graph: List[Tuple[str, str, float]]) 
     str
         The sampled token.
     """
-    # Filter the graph for the given token
-    filtered_graph = [edge for edge in n_gram_graph if edge[0] == token]
+    choices = list(n_gram_graph.get(n_gram, {}).keys())
+    probabilities = list(n_gram_graph.get(n_gram, {}).values())
 
     # Sample a token based on the probabilities
-    sampled_token = random.choices(
-        [edge[1] for edge in filtered_graph],
-        weights=[edge[2] for edge in filtered_graph],
+    sampled_n_gram = random.choices(
+        choices,
+        weights=probabilities,
         k=1,
     )[0]
 
-    return sampled_token
+    return sampled_n_gram
 
 
 if __name__ == "__main__":
     # Example usage
-    text_corpus = load_in_text_corpus("text.txt")
-    n = 2
+    text_corpus = load_in_text_corpus("corpus.txt")
+    n = 5
 
     # Calculate n-grams
     n_grams = calculate_n_grams(tokenise(text_corpus), n)
@@ -192,25 +196,24 @@ if __name__ == "__main__":
         n_gram_probabilities.items(), key=lambda x: x[1], reverse=True
     )[:5]:
         print(f"{n_gram}: {prob:.2%}")
-
     # Create n-gram graph
-    n_gram_graph = create_n_gram_graph(n_gram_frequency)
+    n_gram_graph = create_n_gram_graph(text_corpus, n)
+    # Print the first 5 edges of the n-gram graph
+    print(f"First 5 edges of the n-gram graph:")
+    for source, targets in list(n_gram_graph.items())[:5]:
+        for target, prob in targets.items():
+            print(f"{source} -> {target}: {prob}")
 
-    # Create a dataframe from the n-gram graph
-    n_gram_graph_df = pd.DataFrame(
-        n_gram_graph, columns=["source_token", "target_token", "probability"]
-    )
+    print("=" * 50)
+    print("\n")
 
-    # Save the dataframe to a CSV file
-    n_gram_graph_df.to_csv("n_gram_graph.csv", index=False)
+    n_gram = random.choice(list(n_gram_graph.keys()))
+    print(f"Random n-gram: {n_gram}")
+    n_grams = [n_gram]
 
-    token = "the"
-    tokens = [token]
-
-    while len(tokens) < 500:
+    while len(n_grams) < 200:
         # Sample a token from the n-gram graph
-        token = sample_n_gram_graph(token, n_gram_graph)
-
+        n_gram = sample_n_gram_graph(n_gram, n_gram_graph)
         # Append the token to the text
-        tokens.append(token)
-    print(detokenise(tokens))
+        n_grams.append(n_gram)
+    print(recombine_n_grams(n_grams))
