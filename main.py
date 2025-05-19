@@ -1,6 +1,7 @@
+import argparse
 from loader import load_in_text_corpus
 from generate_text import generate_text
-from tokeniser import tokenise, detokenise
+from tokeniser import tokenise
 from calculate_probabilities import (
     calculate_n_grams,
     calculate_n_gram_frequency,
@@ -10,10 +11,10 @@ from calculate_probabilities import (
 
 import random
 
-if __name__ == "__main__":
+
+def main(n, text_path):
     # Example usage
-    text_corpus = load_in_text_corpus("frankenstein.txt")
-    n = 5
+    text_corpus = load_in_text_corpus(text_path)
 
     # Calculate n-grams
     n_grams = calculate_n_grams(tokenise(text_corpus), n)
@@ -56,30 +57,12 @@ if __name__ == "__main__":
     )
     print(f"Generated text: {gnerated_text}")
 
-    # Find stationary states using Markov chain analysis
 
-    # # Build a list of all unique n-grams (states)
-    # states = list(n_gram_graph.keys())
-    # state_indices = {state: i for i, state in enumerate(states)}
-    # N = len(states)
-
-    # # Build the transition matrix
-    # P = np.zeros((N, N))
-    # for i, source in enumerate(states):
-    #     for target, prob in n_gram_graph[source].items():
-    #         if target in state_indices:
-    #             j = state_indices[target]
-    #             P[i, j] = prob
-
-    # # Find the stationary distribution: solve πP = π, sum(π)=1
-    # eigvals, eigvecs = np.linalg.eig(P.T)
-    # # Find the eigenvector corresponding to eigenvalue 1
-    # stationary = np.real(eigvecs[:, np.isclose(eigvals, 1)])
-    # stationary = stationary[:, 0]
-    # stationary = stationary / stationary.sum()
-
-    # # Print the top 5 stationary states
-    # print("Top 5 stationary states:")
-    # top_indices = np.argsort(stationary)[::-1][:5]
-    # for idx in top_indices:
-    #     print(f"{states[idx]}: {stationary[idx]:.4f}")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Markov Chain N-gram Text Predictor")
+    parser.add_argument(
+        "--n", type=int, help="n in n-grams (e.g. 2 for bigrams, 3 for trigrams)"
+    )
+    parser.add_argument("--text_path", type=str, help="Path to the text source file")
+    args = parser.parse_args()
+    main(args.n, args.text_path)
