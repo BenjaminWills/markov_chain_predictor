@@ -3,3 +3,4 @@ numpy
 
 # Network visualisers
 networkx
+matplotlib
