@@ -1,6 +1,10 @@
 # Markov chain text predictor
 
-We can use mathematical objects called markov chains to predict the next word in a sentance.
+We can use mathematical objects called markov chains to predict the next word in a sentance. 
+
+I was interested in looking into these because they work as a statistical analogy to transformer models. I wanted to see how well they could perform when trained on various text corpus'. 
+
+I'm also interested in running some Markov-Chain analyses on the chains that are created out of natural language.
 
 ## Use
 
