@@ -91,3 +91,17 @@ The tokeniser in this repo is rudimentary, it splits based on words and punctuat
 # Corpus generation
 
 I used Project Gutenburg to collate a text corpus, see `scrape_books.py` to see how their `books` api was used to save an arbritrary amount of books.
+
+# Analysis
+
+To analyse how text looks when reduced into this markov chain, I inspected the degree distributions of the chains for different vlaues of n-grams. For 1-grams, the degree distribution looked as follows:
+
+![image](1_gram_frankenstein_degree_distribution.png)
+
+Here we can see that the median degree is ~4 for each 1-gram, meaning that for each word, on median, there are 4 other words that can proceed it. Interestingly there is clearly a lot of language structure encoded from Frankenstein, as we see that chains of words are already forming. 
+
+As we increase n to be a 2-gram / bigram, we see a much sparser plot with much more structure:
+
+![image](2_gram_frankenstein_degree_distribution.png)
+
+Here we see that the boxplot has completely collapsed into a very tight range of ~2 connections per birgram, this trend continues as we increase n. This is because more structure of language is encoded as we increase the n gram, as the statistical model is given more context.
