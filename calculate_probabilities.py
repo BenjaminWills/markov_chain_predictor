@@ -1,12 +1,7 @@
 from collections import Counter, defaultdict
 from typing import Dict, List, Tuple
 
-from tokeniser import tokenise, detokenise
-from loader import load_in_text_corpus
-from generate_text import generate_text
-
-import random
-import numpy as np
+from tokeniser import tokenise
 
 
 def calculate_n_grams(tokens: List[str], n: int) -> List[Tuple[str]]:
