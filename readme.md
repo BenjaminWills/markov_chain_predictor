@@ -2,6 +2,16 @@
 
 We can use mathematical objects called markov chains to predict the next word in a sentance.
 
+## Use
+
+You can use this markov chain predictor easily by using the `main.py` file like so:
+
+```
+python main.py --n 3 --text_path "test.txt"
+```
+
+Where '--n' refers to the size of the n-gram, and the text path is where the chain learns its vocabulary and states from (see below).
+
 ## How does this work?
 
 A markov chain is a collection of `states` connected by edges that denote the probability of going from state `i` to state `j`.
