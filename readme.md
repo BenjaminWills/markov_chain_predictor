@@ -80,6 +80,8 @@ Of course, by feeding the model more information, it gains a better understandin
 
 >**Random n-gram: ('in', 'imagination', 'to')**: in imagination to the other as politely and more earnestly negatived,she seated herself.Mrs.Gardiner,whose manners resembled those of a large house in Edward Street,and breaking the seal,to her,and her predilection for him was his own great-great-grand-mother of all tragedies?Where,that is all.She might never even see him again.He is very good,and they kneeled down and rested their foreheads on the coffin-lid,and then they d find out I loved her once!It seems to be all well is a disease like everything that exceeds moderation.And,what,at parties,is there a fleeting moment of real colour.Then the old man said,And first-rate strokes himself,and he took off his hat on seeing her again.Valancy had stared around her.She would just slip down for I raised her and smiled with her eyes fixed on the floor and read and looked and spoke with the same picture inside,and a yachting cap.
 
+So with this method we've managed to turn text generation into a random walk along a markov chain of n-grams extracted from the text. Note that this has no real use, it's just a cool model that can make text.
+
 # Tokenisation
 
 The tokeniser in this repo is rudimentary, it splits based on words and punctuation.
