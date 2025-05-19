@@ -21,9 +21,15 @@ def calculate_n_grams(tokens: List[str], n: int) -> List[Tuple[str]]:
         A list of n-grams, where each n-gram is a tuple of n tokens.
     """
 
-    # Create the list of n grams, to do this we look at the tokenisation n-wise and create a list of n grams
+    if not isinstance(tokens, list):
+        raise TypeError("tokens must be a list of strings")
+    if not all(isinstance(token, str) for token in tokens):
+        raise ValueError("all elements in tokens must be strings")
+    if not isinstance(n, int) or n <= 0:
+        raise ValueError("n must be a positive integer")
+    if len(tokens) < n:
+        return []
     n_grams = [tuple(tokens[i : i + n]) for i in range(len(tokens) - n + 1)]
-
     return n_grams
 
 
@@ -42,7 +48,20 @@ def calculate_n_gram_frequency(text_corpus: str, n: int) -> Counter:
     Dict[str, int]
         A dictionary where the keys are n-grams and the values are their frequencies in the text corpus.
     """
-
+    # Check if the text corpus is a string
+    if not isinstance(text_corpus, str):
+        raise TypeError("text_corpus must be a string")
+    # Check if n is a positive integer
+    if not isinstance(n, int) or n <= 0:
+        raise ValueError("n must be a positive integer")
+    # Check if the text corpus is empty
+    if not text_corpus:
+        raise ValueError("text_corpus must not be empty")
+    # Check if n is greater than the length of the text corpus
+    if len(text_corpus.split()) < n:
+        raise ValueError(
+            "n must be less than or equal to the length of the text corpus"
+        )
     # Tokenise the text corpus
     tokens = tokenise(text_corpus)
 
@@ -72,6 +91,12 @@ def calculate_n_gram_probabilities(
     Dict[str, float]
         A dictionary where the keys are n-grams and the values are their probabilities in the text corpus.
     """
+    # Check if n_gram_frequency is empty
+    if not n_gram_frequency:
+        raise ValueError("n_gram_frequency must not be empty")
+    # Check if n_gram_frequency is a Counter
+    if not isinstance(n_gram_frequency, Counter):
+        raise TypeError("n_gram_frequency must be a Counter")
 
     # Calculate the total number of tokens
     total_tokens = sum(n_gram_frequency.values())
