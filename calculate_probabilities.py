@@ -3,29 +3,27 @@ from typing import Dict, List, Tuple
 
 from tokeniser import tokenise, detokenise
 from loader import load_in_text_corpus
-
-import pandas as pd
-
-import networkx as nx
-import matplotlib.pyplot as plt
+from generate_text import generate_text
 
 import random
+import numpy as np
 
 
 def calculate_n_grams(tokens: List[str], n: int) -> List[Tuple[str]]:
-    """_summary_
+    """Calculates n-grams from a list of tokens, these are simply tuples of n consecutive tokens
+    in a list of tokens.
 
     Parameters
     ----------
     tokens : List[str]
-        _description_
+        A list of tokens to calculate n-grams from.
     n : int
-        _description_
+        The size of the n-grams to calculate, e.g. 2 for bigrams, 3 for trigrams, etc.
 
     Returns
     -------
     List[Tuple[str]]
-        _description_
+        A list of n-grams, where each n-gram is a tuple of n tokens.
     """
 
     # Create the list of n grams, to do this we look at the tokenisation n-wise and create a list of n grams
@@ -34,20 +32,20 @@ def calculate_n_grams(tokens: List[str], n: int) -> List[Tuple[str]]:
     return n_grams
 
 
-def calculate_word_frequency(text_corpus: str, n: int) -> Counter:
-    """_summary_
+def calculate_n_gram_frequency(text_corpus: str, n: int) -> Counter:
+    """Calculate the frequency of n-grams in a text corpus.
 
     Parameters
     ----------
     text_corpus : str
-        _description_
+        The text corpus to calculate n-gram frequencies from.
     n : int
-        _description_
+        The size of the n-grams to calculate, e.g. 2 for bigrams, 3 for trigrams, etc.
 
     Returns
     -------
     Dict[str, int]
-        _description_
+        A dictionary where the keys are n-grams and the values are their frequencies in the text corpus.
     """
 
     # Tokenise the text corpus
@@ -65,17 +63,19 @@ def calculate_word_frequency(text_corpus: str, n: int) -> Counter:
 def calculate_n_gram_probabilities(
     n_gram_frequency: Dict[str, int],
 ) -> Dict[str, float]:
-    """_summary_
+    """Calculates the probability of each n-gram in a text corpus. The probability of each n-gram is
+    calculated as the frequency of the n-gram divided by the total number of tokens in the text corpus.
+    This is a simple way to calculate the probability of each n-gram.
 
     Parameters
     ----------
     n_gram_frequency : Dict[str, int]
-        _description_
+        A dictionary where the keys are n-grams and the values are their frequencies in the text corpus.
 
     Returns
     -------
     Dict[str, float]
-        _description_
+        A dictionary where the keys are n-grams and the values are their probabilities in the text corpus.
     """
 
     # Calculate the total number of tokens
@@ -93,6 +93,23 @@ def create_n_gram_graph(
     text_corpus: str,
     n: int,
 ) -> Dict[str, Dict[Tuple[str], float]]:
+    """Creates a n-gram graph from a text corpus. The n-gram graph is a dictionary where the keys are n-grams
+    and the values are dictionaries of n-grams and their probabilities of being the next state given the current state.
+    This is what is known as a markov process, where the next state is dependent on the current state.
+
+    Parameters
+    ----------
+    text_corpus : str
+        The text corpus to create the n-gram graph from.
+    n : int
+        The size of the n-grams to calculate, e.g. 2 for bigrams, 3 for trigrams, etc.
+
+    Returns
+    -------
+    Dict[str, Dict[Tuple[str], float]]
+        A dictionary where the keys are n-grams and the values are dictionaries of n-grams and their probabilities
+        of being the next state given the current state.
+    """
     # Tokenise the text corpus
     tokens = tokenise(text_corpus)
 
@@ -120,61 +137,9 @@ def create_n_gram_graph(
     return n_gram_graph
 
 
-def recombine_n_grams(n_grams: List[Tuple[str]]) -> str:
-    """Recombine n-grams into a string.
-
-    Parameters
-    ----------
-    n_grams : List[Tuple[str]]
-        The list of n-grams to recombine.
-
-    Returns
-    -------
-    str
-        The recombined string.
-    """
-    # Initally take the first three tokens
-    recombined_token_list = list(n_grams[0])
-    # Loop through the n-grams and append the last token of each n-gram
-    for n_gram in n_grams[1:]:
-        # Append the last token of the n-gram
-        recombined_token_list.append(n_gram[-1])
-    return detokenise(recombined_token_list)
-
-
-def sample_n_gram_graph(
-    n_gram: Tuple[str], n_gram_graph: Dict[str, Dict[Tuple[str], float]]
-) -> str:
-    """Sample a token from the n-gram graph given a token.
-
-    Parameters
-    ----------
-    token : str
-        The token to sample from.
-    n_gram_graph : List[Tuple[str, str, float]]
-        The n-gram graph.
-
-    Returns
-    -------
-    str
-        The sampled token.
-    """
-    choices = list(n_gram_graph.get(n_gram, {}).keys())
-    probabilities = list(n_gram_graph.get(n_gram, {}).values())
-
-    # Sample a token based on the probabilities
-    sampled_n_gram = random.choices(
-        choices,
-        weights=probabilities,
-        k=1,
-    )[0]
-
-    return sampled_n_gram
-
-
 if __name__ == "__main__":
     # Example usage
-    text_corpus = load_in_text_corpus("corpus.txt")
+    text_corpus = load_in_text_corpus("frankenstein.txt")
     n = 5
 
     # Calculate n-grams
@@ -182,7 +147,7 @@ if __name__ == "__main__":
     print(f"# of {n}-grams: {len(n_grams):,}")
 
     # Calculate n-gram frequency
-    n_gram_frequency = calculate_word_frequency(text_corpus, n)
+    n_gram_frequency = calculate_n_gram_frequency(text_corpus, n)
     # Print the first 5 most common n-grams
     print(f"Most common {n}-grams:")
     for n_gram, freq in n_gram_frequency.most_common(5):
@@ -211,9 +176,37 @@ if __name__ == "__main__":
     print(f"Random n-gram: {n_gram}")
     n_grams = [n_gram]
 
-    while len(n_grams) < 200:
-        # Sample a token from the n-gram graph
-        n_gram = sample_n_gram_graph(n_gram, n_gram_graph)
-        # Append the token to the text
-        n_grams.append(n_gram)
-    print(recombine_n_grams(n_grams))
+    gnerated_text = generate_text(
+        initial_state=n_gram,
+        n_gram_graph=n_gram_graph,
+        text_token_length=100,
+    )
+    print(f"Generated text: {gnerated_text}")
+
+    # Find stationary states using Markov chain analysis
+
+    # # Build a list of all unique n-grams (states)
+    # states = list(n_gram_graph.keys())
+    # state_indices = {state: i for i, state in enumerate(states)}
+    # N = len(states)
+
+    # # Build the transition matrix
+    # P = np.zeros((N, N))
+    # for i, source in enumerate(states):
+    #     for target, prob in n_gram_graph[source].items():
+    #         if target in state_indices:
+    #             j = state_indices[target]
+    #             P[i, j] = prob
+
+    # # Find the stationary distribution: solve πP = π, sum(π)=1
+    # eigvals, eigvecs = np.linalg.eig(P.T)
+    # # Find the eigenvector corresponding to eigenvalue 1
+    # stationary = np.real(eigvecs[:, np.isclose(eigvals, 1)])
+    # stationary = stationary[:, 0]
+    # stationary = stationary / stationary.sum()
+
+    # # Print the top 5 stationary states
+    # print("Top 5 stationary states:")
+    # top_indices = np.argsort(stationary)[::-1][:5]
+    # for idx in top_indices:
+    #     print(f"{states[idx]}: {stationary[idx]:.4f}")
